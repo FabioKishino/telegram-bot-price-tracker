@@ -1,0 +1,36 @@
+name: Checar preços
+
+on:
+  schedule:
+    - cron: "7 * * * *" # a cada 1h (minuto 7 para fugir do pico do minuto 0)
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: checar-precos
+  cancel-in-progress: false
+
+jobs:
+  checar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Instalar dependências
+        run: pip install -r requirements.txt
+
+      - name: Checar preços (Mercado Livre, Kabum, Terabyte, Pichau)
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python -m scraper.main --excluir amazon

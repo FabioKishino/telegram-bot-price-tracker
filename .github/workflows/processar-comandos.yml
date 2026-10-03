@@ -1,0 +1,36 @@
+name: Processar comandos do bot
+
+on:
+  schedule:
+    - cron: "*/5 * * * *" # a cada 5min (mínimo do GitHub; na prática pode atrasar)
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: processar-comandos
+  cancel-in-progress: false
+
+jobs:
+  comandos:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Instalar dependências
+        run: pip install -r requirements.txt
+
+      - name: Processar comandos
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        run: python -m bot.processar_comandos

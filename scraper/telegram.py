@@ -36,11 +36,11 @@ def _sanitizar(texto: str) -> str:
     return texto.replace(token, "***") if token else texto
 
 
-def api(metodo: str, timeout: float = 30, **params):
+def api(metodo: str, http_timeout: float = 30, **params):
     """Chama um método da Bot API e devolve o campo `result`."""
     url = f"{API_BASE}/bot{_token()}/{metodo}"
     try:
-        resp = requests.post(url, json=params, timeout=timeout)
+        resp = requests.post(url, json=params, timeout=http_timeout)
     except requests.RequestException as e:
         # `from None` evita que o traceback original (com a URL) seja impresso.
         raise TelegramErro(f"{metodo}: erro de rede ({type(e).__name__}: {_sanitizar(str(e))})") from None
